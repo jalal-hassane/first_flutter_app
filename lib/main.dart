@@ -48,9 +48,13 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  bool visible = false;
+  bool alphaVisible = false;
   int _counter = 0;
   Color color = Colors.white;
   Color textColor = Colors.black;
+  double alpha = 0;
+  String input = "";
 
   void _incrementCounter() {
     setState(() {
@@ -69,13 +73,27 @@ class _MyHomePageState extends State<MyHomePage> {
     return Color((Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0);
   }
 
-  void showSnackBar(){
+  void showSnackBar() {
     String text = "Counter is $_counter";
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(text),
       duration: Duration(milliseconds: 1000),
     ));
   }
+
+  void showImage() {
+    setState(() {
+      visible = !visible;
+    });
+  }
+
+  void showImageWithAnimation() {
+    setState(() {
+      alphaVisible = !alphaVisible;
+      alpha = !alphaVisible ? 0 : 1;
+    });
+  }
+
   void _decrementCounter() {
     setState(() {
       // This call to setState tells the Flutter framework that something has
@@ -86,6 +104,41 @@ class _MyHomePageState extends State<MyHomePage> {
       _counter--;
     });
   }
+
+  Future<void> _showDialog(String name) {
+    String text = 'the king of Flutter';
+    String message = "";
+    String title = "";
+
+    if (name == 'mahmoud') {
+      title = 'WROOOOOOOONG';
+      message = "mahmoud is not $text";
+    } else {
+      title = "That is correct";
+      message = "jalal is $text!!! hahaha";
+    }
+
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          //title: const Text(title),
+          title: Text(title),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void checkCompletion() {}
 
   @override
   Widget build(BuildContext context) {
@@ -122,8 +175,53 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
-              'You have pushed the button this many times:',
-              style: TextStyle(color: textColor),
+              "Who is the king of Flutter?",
+              style: TextStyle(
+                  color: Colors.blue,
+                  fontSize: 20,
+                  fontFamily: "Georgia",
+                  fontWeight: FontWeight.w100),
+            ),
+            Center(
+              widthFactor: 1,
+              child: TextField(
+                controller: TextEditingController(),
+                focusNode: FocusNode(),
+                style: TextStyle(
+                    backgroundColor: Colors.yellow,
+                    color: Colors.deepPurple,
+                    fontSize: 32,
+                    fontFamily: "Georgia",
+                    fontWeight: FontWeight.w200),
+                cursorColor: Colors.green,
+                onEditingComplete: checkCompletion,
+                onChanged: (String value) async {
+                  if (value == 'mahmoud') {
+                    _showDialog('mahmoud');
+                    return;
+                  }
+                  if (value != 'jalal') {
+                    return;
+                  }
+                  await _showDialog('jalal');
+                },
+              ),
+            ),
+            Visibility(
+              visible: visible,
+              child: Image.asset(
+                'assets/images/image.jpg',
+                width: 200,
+                height: 200,
+              ),
+            ),
+            GestureDetector(
+              onLongPress: showImageWithAnimation,
+              onTap: showImage,
+              child: Text(
+                'You have pushed the button this many times:',
+                style: TextStyle(color: textColor),
+              ),
             ),
             GestureDetector(
               onTap: showSnackBar,
@@ -135,6 +233,18 @@ class _MyHomePageState extends State<MyHomePage> {
                     ?.copyWith(inherit: true, color: color), // TextStyle
               ),
             ),
+            AnimatedOpacity(
+              opacity: alpha,
+              duration: Duration(milliseconds: 2000),
+              child: Visibility(
+                //visible: alphaVisible,
+                child: Image.asset(
+                  'assets/images/image.jpg',
+                  width: 200,
+                  height: 200,
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -144,7 +254,11 @@ class _MyHomePageState extends State<MyHomePage> {
         //foregroundColor: color,
         backgroundColor: textColor,
         child: GestureDetector(
-          child: Icon(Icons.add,size: 36,color: color,),
+          child: Icon(
+            Icons.add,
+            size: 24,
+            color: color,
+          ),
           onLongPress: _decrementCounter,
         ),
       ), // This trailing comma makes auto-formatting nicer for build methods.
